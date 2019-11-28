@@ -8,7 +8,9 @@ const MySwal = withReactContent(Swal);
 class Home extends Component {
   state = {
     data: [],
-    isopen: false
+    isopen: false,
+    modalEdit: false,
+    indexedit: -1
   };
 
   componentDidMount() {
@@ -19,25 +21,6 @@ class Home extends Component {
       ]
     });
   }
-
-  btnAddClick = () => {
-    // button untuk add data
-    var kegiatan = this.refs.kegiatan.value;
-    var tanggal = this.refs.tanggal.value;
-    var obj = {
-      kegiatan,
-      status: false,
-      tanggal
-    };
-
-    if (kegiatan === "" || tanggal === "") {
-      MySwal.fire("Cancelled", "Datanya Gaboleh Kosong Oi", "error");
-    } else {
-      var newdata = [...this.state.data, obj];
-      this.setState({ data: newdata, isopen: false });
-      MySwal.fire("Success!", "Data Berhasil ditambah!", "success");
-    }
-  };
 
   btnDeleteClick = index => {
     MySwal.fire({
@@ -66,6 +49,17 @@ class Home extends Component {
     });
   };
 
+  btnEditClick = index => {
+    this.setState({ modalEdit: true, indexedit: index });
+  };
+
+  // renderModalEdit = () => {
+  //   var x = this.state.indexedit.value;
+  //   return (
+
+  //   );
+  // };
+
   renderTodo = () => {
     //untuk print data & harus tulis function dgn es6
     return this.state.data.map((val, index) => {
@@ -76,7 +70,12 @@ class Home extends Component {
           <td>{val.status ? "Sudah" : "Belom"}</td>
           <td>{val.tanggal}</td>
           <td>
-            <button className="btn btn-primary mr-3">Edit</button>
+            <button
+              onClick={() => this.btnEditClick(index)}
+              className="btn btn-primary mr-3"
+            >
+              Edit
+            </button>
             <button
               onClick={() => this.btnDeleteClick(index)}
               className="btn btn-danger"
@@ -87,6 +86,43 @@ class Home extends Component {
         </tr>
       );
     });
+  };
+
+  btnAddClick = () => {
+    // button untuk add data
+    var kegiatan = this.refs.kegiatan.value;
+    var tanggal = this.refs.tanggal.value;
+    var obj = {
+      kegiatan,
+      status: false,
+      tanggal
+    };
+
+    if (kegiatan === "" || tanggal === "") {
+      MySwal.fire("Cancelled", "Datanya Gaboleh Kosong Oi", "error");
+    } else {
+      var newdata = [...this.state.data, obj];
+      this.setState({ data: newdata, isopen: false });
+      MySwal.fire("Success!", "Data Berhasil ditambah!", "success");
+    }
+  };
+
+  btnSaveClick = () => {
+    var kegiatan = this.refs.kegiatan.value;
+    var status = false;
+    if (this.refs.status.value === "true") {
+      status = true;
+    } else if (this.refs.status.value === "false") {
+      status = false;
+    }
+    var tanggal = this.refs.tanggal.value;
+    var obj = { kegiatan, status, tanggal };
+    var index = this.state.indexedit;
+    // console.log(obj);
+    var data = this.state.data;
+    data.splice(index, 1, obj);
+    this.setState({ data: data, indexedit: -1, modalEdit: false });
+    MySwal.fire("Updated!", "Your item has been updated.", "success");
   };
 
   render() {
@@ -119,6 +155,45 @@ class Home extends Component {
             </button>
             <button
               onClick={() => this.setState({ isopen: false })}
+              className="btn btn-danger"
+            >
+              Cancel
+            </button>
+          </ModalFooter>
+        </Modal>
+        {/* Modal Edit Data */}
+        <Modal
+          isOpen={this.state.modalEdit}
+          toggle={() => this.setState({ modalEdit: false })}
+        >
+          <ModalHeader>Edit Data</ModalHeader>
+          <ModalBody>
+            {/* Ini isi modalnya */}
+            <input
+              className="form-control"
+              placeholder=""
+              type="text"
+              ref="kegiatan"
+            />
+            <br />
+            <select className="form-control" ref="status">
+              <option value="true">Sudah</option>
+              <option value="false">Belum</option>
+            </select>
+            <br />
+            <input
+              className="form-control"
+              placeholder=""
+              type="date"
+              ref="tanggal"
+            />
+          </ModalBody>
+          <ModalFooter>
+            <button onClick={this.btnSaveClick} className="btn btn-success">
+              Save
+            </button>
+            <button
+              onClick={() => this.setState({ modalEdit: false, indexedit: -1 })}
               className="btn btn-danger"
             >
               Cancel
