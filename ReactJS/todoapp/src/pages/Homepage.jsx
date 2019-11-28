@@ -22,6 +22,25 @@ class Home extends Component {
     });
   }
 
+  btnAddClick = () => {
+    // button untuk add data
+    var kegiatan = this.refs.kegiatan.value;
+    var tanggal = this.refs.tanggal.value;
+    var obj = {
+      kegiatan,
+      status: false,
+      tanggal
+    };
+
+    if (kegiatan === "" || tanggal === "") {
+      MySwal.fire("Cancelled", "Datanya Gaboleh Kosong Oi", "error");
+    } else {
+      var newdata = [...this.state.data, obj];
+      this.setState({ data: newdata, isopen: false });
+      MySwal.fire("Success!", "Data Berhasil ditambah!", "success");
+    }
+  };
+
   btnDeleteClick = index => {
     MySwal.fire({
       title:
@@ -53,12 +72,78 @@ class Home extends Component {
     this.setState({ modalEdit: true, indexedit: index });
   };
 
-  // renderModalEdit = () => {
-  //   var x = this.state.indexedit.value;
-  //   return (
+  btnSaveClick = () => {
+    var kegiatan = this.refs.kegiatan.value;
+    var status = false;
+    if (this.refs.status.value === "true") {
+      status = true;
+    } else if (this.refs.status.value === "false") {
+      status = false;
+    }
+    var tanggal = this.refs.tanggal.value;
+    var obj = { kegiatan, status, tanggal };
+    var index = this.state.indexedit;
+    // console.log(obj);
+    var data = this.state.data;
+    data.splice(index, 1, obj);
+    this.setState({ data: data, indexedit: -1, modalEdit: false });
+    MySwal.fire("Updated!", "Your item has been updated.", "success");
+  };
 
-  //   );
-  // };
+  renderEdit = () => {
+    return this.state.data.map((val, index) => {
+      if (this.state.indexedit === index) {
+        return (
+          <div key={index}>
+            <Modal
+              isOpen={this.state.modalEdit}
+              toggle={() => this.setState({ modalEdit: false })}
+            >
+              <ModalHeader>Edit Data</ModalHeader>
+              <ModalBody>
+                {/* Ini isi modalnya */}
+                <input
+                  className="form-control"
+                  defaultValue={val.kegiatan}
+                  type="text"
+                  ref="kegiatan"
+                />
+                <br />
+                <select
+                  defaultValue={val.status}
+                  className="form-control"
+                  ref="status"
+                >
+                  <option value="true">Sudah</option>
+                  <option value="false">Belum</option>
+                </select>
+                <br />
+                <input
+                  className="form-control"
+                  defaultValue={val.tanggal}
+                  type="date"
+                  ref="tanggal"
+                />
+              </ModalBody>
+              <ModalFooter>
+                <button onClick={this.btnSaveClick} className="btn btn-success">
+                  Save
+                </button>
+                <button
+                  onClick={() =>
+                    this.setState({ modalEdit: false, indexedit: -1 })
+                  }
+                  className="btn btn-danger"
+                >
+                  Cancel
+                </button>
+              </ModalFooter>
+            </Modal>
+          </div>
+        );
+      }
+    });
+  };
 
   renderTodo = () => {
     //untuk print data & harus tulis function dgn es6
@@ -86,43 +171,6 @@ class Home extends Component {
         </tr>
       );
     });
-  };
-
-  btnAddClick = () => {
-    // button untuk add data
-    var kegiatan = this.refs.kegiatan.value;
-    var tanggal = this.refs.tanggal.value;
-    var obj = {
-      kegiatan,
-      status: false,
-      tanggal
-    };
-
-    if (kegiatan === "" || tanggal === "") {
-      MySwal.fire("Cancelled", "Datanya Gaboleh Kosong Oi", "error");
-    } else {
-      var newdata = [...this.state.data, obj];
-      this.setState({ data: newdata, isopen: false });
-      MySwal.fire("Success!", "Data Berhasil ditambah!", "success");
-    }
-  };
-
-  btnSaveClick = () => {
-    var kegiatan = this.refs.kegiatan.value;
-    var status = false;
-    if (this.refs.status.value === "true") {
-      status = true;
-    } else if (this.refs.status.value === "false") {
-      status = false;
-    }
-    var tanggal = this.refs.tanggal.value;
-    var obj = { kegiatan, status, tanggal };
-    var index = this.state.indexedit;
-    // console.log(obj);
-    var data = this.state.data;
-    data.splice(index, 1, obj);
-    this.setState({ data: data, indexedit: -1, modalEdit: false });
-    MySwal.fire("Updated!", "Your item has been updated.", "success");
   };
 
   render() {
@@ -161,45 +209,7 @@ class Home extends Component {
             </button>
           </ModalFooter>
         </Modal>
-        {/* Modal Edit Data */}
-        <Modal
-          isOpen={this.state.modalEdit}
-          toggle={() => this.setState({ modalEdit: false })}
-        >
-          <ModalHeader>Edit Data</ModalHeader>
-          <ModalBody>
-            {/* Ini isi modalnya */}
-            <input
-              className="form-control"
-              placeholder=""
-              type="text"
-              ref="kegiatan"
-            />
-            <br />
-            <select className="form-control" ref="status">
-              <option value="true">Sudah</option>
-              <option value="false">Belum</option>
-            </select>
-            <br />
-            <input
-              className="form-control"
-              placeholder=""
-              type="date"
-              ref="tanggal"
-            />
-          </ModalBody>
-          <ModalFooter>
-            <button onClick={this.btnSaveClick} className="btn btn-success">
-              Save
-            </button>
-            <button
-              onClick={() => this.setState({ modalEdit: false, indexedit: -1 })}
-              className="btn btn-danger"
-            >
-              Cancel
-            </button>
-          </ModalFooter>
-        </Modal>
+        <div>{this.renderEdit()}</div>
         <div className="px-5 mx-5 my-5">
           <Table>
             <thead>
